@@ -19,7 +19,10 @@ Function ConvertFile( inputFile, outputFile, formatEnumeration )
   On Error Resume Next
   Set wordApplication = GetObject(, "Word.Application")
   If Err <> 0 Then
-    WScript.Quit -6
+    Set wordApplication = CreateObject("Word.Application")
+    'The Application disappears sometimes (like, once in a month) due to unknown reasons.
+    'Hence it needs to be recreated as a workaround.
+    'WScript.Quit -6
   End If
   On Error GoTo 0
 
