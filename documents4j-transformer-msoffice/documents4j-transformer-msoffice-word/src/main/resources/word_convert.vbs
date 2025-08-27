@@ -59,6 +59,10 @@ Function ConvertFile( inputFile, outputFile, formatEnumeration )
 
     ' Close the source document.
     wordDocument.Close WdDoNotSaveChanges
+
+    ' IFA: seems necessary to clear file handle in windows-cache
+    set wordDocument = Nothing
+    
     If Err <> 0 Then
       WScript.Quit -3
     End If
