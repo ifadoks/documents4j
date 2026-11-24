@@ -9,7 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -118,6 +122,44 @@ public abstract class AbstractConverterTest {
     }
 
     protected abstract IConverterTestDelegate getConverterTestDelegate();
+
+    protected static class CloseTrackingInputStream extends FilterInputStream {
+
+        private int closeCount;
+
+        protected CloseTrackingInputStream(InputStream inputStream) {
+            super(inputStream);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closeCount++;
+            super.close();
+        }
+
+        protected int getCloseCount() {
+            return closeCount;
+        }
+    }
+
+    protected static class CloseTrackingOutputStream extends FilterOutputStream {
+
+        private int closeCount;
+
+        protected CloseTrackingOutputStream(OutputStream outputStream) {
+            super(outputStream);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closeCount++;
+            super.close();
+        }
+
+        protected int getCloseCount() {
+            return closeCount;
+        }
+    }
 
     protected IConverter getConverter() {
         return getConverterTestDelegate().getConverter();

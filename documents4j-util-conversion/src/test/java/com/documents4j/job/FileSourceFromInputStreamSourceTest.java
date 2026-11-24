@@ -7,7 +7,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -20,7 +23,14 @@ public class FileSourceFromInputStreamSourceTest extends AbstractAdapterTest {
     public void testDelegation() throws Exception {
         File source = makeFile(true), target = makeFile(false);
 
-        InputStream inputStream = spy(new FileInputStream(source));
+        AtomicBoolean inputStreamClosed = new AtomicBoolean();
+        InputStream inputStream = new FilterInputStream(new FileInputStream(source)) {
+            @Override
+            public void close() throws IOException {
+                inputStreamClosed.set(true);
+                super.close();
+            }
+        };
 
         IInputStreamSource inputStreamSource = mock(IInputStreamSource.class);
         when(inputStreamSource.getInputStream()).thenReturn(inputStream);
@@ -36,8 +46,9 @@ public class FileSourceFromInputStreamSourceTest extends AbstractAdapterTest {
         assertTrue(target.exists());
         assertEquals(source.length(), target.length());
 
-        verify(inputStream, never()).close();
+        assertFalse(inputStreamClosed.get());
         inputStream.close(); // Release stream manually.
+        assertTrue(inputStreamClosed.get());
         assertTrue(source.delete());
 
         verify(inputStreamSource, times(1)).getInputStream();

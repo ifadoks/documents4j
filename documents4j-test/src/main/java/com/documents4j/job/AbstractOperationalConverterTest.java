@@ -13,6 +13,7 @@ import org.mockito.stubbing.Answer;
 import java.io.*;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -79,41 +80,41 @@ public abstract class AbstractOperationalConverterTest extends AbstractConverter
     public void testInputStreamToOutputStreamExecute() throws Exception {
         File source = validFile(true), target = makeTarget(true);
 
-        InputStream inputStream = spy(new FileInputStream(source));
+        CloseTrackingInputStream inputStream = new CloseTrackingInputStream(new FileInputStream(source));
 
         assertTrue(target.createNewFile());
-        OutputStream outputStream = spy(new FileOutputStream(target));
+        CloseTrackingOutputStream outputStream = new CloseTrackingOutputStream(new FileOutputStream(target));
 
         assertTrue(getConverter().convert(inputStream).as(validInputType()).to(outputStream).as(validTargetType()).execute());
         assertTrue(source.exists());
         assertTrue(target.exists());
 
-        verify(inputStream, times(1)).close();
-        verify(outputStream, times(1)).close();
+        assertEquals(1, inputStream.getCloseCount());
+        assertEquals(1, outputStream.getCloseCount());
     }
 
     @Test(timeout = DEFAULT_CONVERSION_TIMEOUT)
     public void testInputStreamToOutputStreamFuture() throws Exception {
         File source = validFile(true), target = makeTarget(true);
 
-        InputStream inputStream = spy(new FileInputStream(source));
+        CloseTrackingInputStream inputStream = new CloseTrackingInputStream(new FileInputStream(source));
 
         assertTrue(target.createNewFile());
-        OutputStream outputStream = spy(new FileOutputStream(target));
+        CloseTrackingOutputStream outputStream = new CloseTrackingOutputStream(new FileOutputStream(target));
 
         assertTrue(getConverter().convert(inputStream).as(validInputType()).to(outputStream).as(validTargetType()).schedule().get());
         assertTrue(source.exists());
         assertTrue(target.exists());
 
-        verify(inputStream, times(1)).close();
-        verify(outputStream, times(1)).close();
+        assertEquals(1, inputStream.getCloseCount());
+        assertEquals(1, outputStream.getCloseCount());
     }
 
     @Test(timeout = DEFAULT_CONVERSION_TIMEOUT)
     public void testInputStreamSourceToInputStreamConsumerExecute() throws Exception {
         File source = validFile(true);
 
-        InputStream inputStream = spy(new FileInputStream(source));
+        CloseTrackingInputStream inputStream = new CloseTrackingInputStream(new FileInputStream(source));
         IInputStreamSource inputStreamSource = mock(IInputStreamSource.class);
         when(inputStreamSource.getInputStream()).thenReturn(inputStream);
 
@@ -126,8 +127,9 @@ public abstract class AbstractOperationalConverterTest extends AbstractConverter
 
         verify(inputStreamSource, times(1)).getInputStream();
         verify(inputStreamSource, times(1)).onConsumed(any(InputStream.class));
-        verify(inputStream, never()).close();
+        assertEquals(0, inputStream.getCloseCount());
         inputStream.close();
+        assertEquals(1, inputStream.getCloseCount());
 
         verify(inputStreamConsumer, times(1)).onComplete(any(InputStream.class));
         verifyNoMoreInteractions(inputStreamConsumer);
@@ -138,7 +140,7 @@ public abstract class AbstractOperationalConverterTest extends AbstractConverter
     public void testInputStreamSourceToInputStreamConsumerFuture() throws Exception {
         File source = validFile(true);
 
-        InputStream inputStream = spy(new FileInputStream(source));
+        CloseTrackingInputStream inputStream = new CloseTrackingInputStream(new FileInputStream(source));
         IInputStreamSource inputStreamSource = mock(IInputStreamSource.class);
         when(inputStreamSource.getInputStream()).thenReturn(inputStream);
 
@@ -151,8 +153,9 @@ public abstract class AbstractOperationalConverterTest extends AbstractConverter
 
         verify(inputStreamSource, times(1)).getInputStream();
         verify(inputStreamSource, times(1)).onConsumed(any(InputStream.class));
-        verify(inputStream, never()).close();
+        assertEquals(0, inputStream.getCloseCount());
         inputStream.close();
+        assertEquals(1, inputStream.getCloseCount());
 
         verify(inputStreamConsumer, times(1)).onComplete(any(InputStream.class));
         verifyNoMoreInteractions(inputStreamConsumer);

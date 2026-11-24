@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -25,7 +25,7 @@ public abstract class AbstractInoperativeConverterTest extends AbstractConverter
 
     @Test(timeout = DEFAULT_CONVERSION_TIMEOUT, expected = ConverterAccessException.class)
     public void testInputStreamToInputStreamConsumerExecute() throws Exception {
-        InputStream inputStream = spy(new FileInputStream(validFile(true)));
+        CloseTrackingInputStream inputStream = new CloseTrackingInputStream(new FileInputStream(validFile(true)));
         IInputStreamConsumer inputStreamConsumer = mock(IInputStreamConsumer.class);
         try {
             getConverter()
@@ -36,7 +36,7 @@ public abstract class AbstractInoperativeConverterTest extends AbstractConverter
         } catch (ConverterAccessException e) {
             verify(inputStreamConsumer).onException(any(ConverterAccessException.class));
             verifyNoMoreInteractions(inputStreamConsumer);
-            verify(inputStream).close();
+            assertEquals(1, inputStream.getCloseCount());
             assertPostConverterState();
             throw e;
         }
@@ -44,7 +44,7 @@ public abstract class AbstractInoperativeConverterTest extends AbstractConverter
 
     @Test(timeout = DEFAULT_CONVERSION_TIMEOUT, expected = ConverterAccessException.class)
     public void testInputStreamToInputStreamConsumerFuture() throws Exception {
-        InputStream inputStream = spy(new FileInputStream(validFile(true)));
+        CloseTrackingInputStream inputStream = new CloseTrackingInputStream(new FileInputStream(validFile(true)));
         IInputStreamConsumer inputStreamConsumer = mock(IInputStreamConsumer.class);
         try {
             getConverter()
@@ -55,7 +55,7 @@ public abstract class AbstractInoperativeConverterTest extends AbstractConverter
         } catch (ExecutionException e) {
             verify(inputStreamConsumer).onException(any(ConverterAccessException.class));
             verifyNoMoreInteractions(inputStreamConsumer);
-            verify(inputStream).close();
+            assertEquals(1, inputStream.getCloseCount());
             assertPostConverterState();
             throw (Exception) e.getCause();
         }

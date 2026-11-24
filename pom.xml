@@ -4,7 +4,7 @@
 
     <groupId>com.documents4j</groupId>
     <artifactId>documents4j-parent</artifactId>
-    <version>1.1.13-SNAPSHOT</version>
+    <version>2.0.0</version>
     <packaging>pom</packaging>
 
     <!--
@@ -110,7 +110,7 @@
         <version.maven.release-plugin>2.5.1</version.maven.release-plugin>
         <version.maven.install-plugin>2.5.1</version.maven.install-plugin>
         <version.maven.jxr-plugin>2.3</version.maven.jxr-plugin>
-        <version.java>8</version.java>
+        <version.java>25</version.java>
     </properties>
 
     <developers>
@@ -353,8 +353,7 @@
                     <version>${version.maven.compiler-plugin}</version>
                     <inherited>true</inherited>
                     <configuration>
-                        <source>${version.java}</source>
-                        <target>${version.java}</target>
+                        <release>${version.java}</release>
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>

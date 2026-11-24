@@ -3,5 +3,4 @@ language: java
 sudo: false
 
 jdk:
-  - openjdk8
-  - openjdk11
+  - openjdk25

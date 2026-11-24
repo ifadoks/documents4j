@@ -257,6 +257,8 @@ Windows service - troubleshooting
 
 Building the project
 --------------------
+Building and running this project requires Java 25 or newer.
+
 This project is set up to allow running as many tests as possible without requiring MS Office or even MS Windows installed. For this purpose, the project includes several rich stubs that step in place of the MS Office bridges. When you are building this project on a machine with MS Windows and MS Office installed, you should build the project with the `ms-office` profile which triggers tests that rely on an actual MS Office instance. You can then build the project using Maven:
 
 ```shell
